@@ -11,6 +11,8 @@ module.exports.loadTasks = loadTasks;
 
 function config (cfg) {
   conf = merge(conf, cfg);
+
+  return this;
 }
 
 function merge(dest, source) {
@@ -47,6 +49,8 @@ function loadTasks (globs) {
   });
 
   files.forEach(loadTask(base));
+
+  return this;
 }
 
 function findBase(a, b, l) {
@@ -66,14 +70,23 @@ function loadTask (base) {
     var e = path.extname(b);
     var x = require(f);
 
-    console.log('loading', r, f, b, d);
-
     var t = {
       name: (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e)
     };
 
     if (isFunction(x)) t.task = x;
-    if (isObject(x)) t = merge(t, x);
+    if (isObject(x)) {
+      t = merge(t, x);
+
+      if (t.hasOwnProperty('config')) {
+        if (isFunction(t.config)) t.config(conf)
+        else if (isObject(t.config)) t.config = merge(t.config, conf)
+        else t.config = conf;
+      }
+      else {
+        t.config = conf;
+      }
+    }
 
     createTask(t);
   };
