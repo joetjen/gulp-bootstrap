@@ -9,36 +9,43 @@ var conf = {};
 function isArray(x) {
   return Array.isArray(x);
 }
+
 function isObject(x) {
   return typeof x === 'object';
 }
+
 function isFunction(x) {
   return typeof x === 'function';
 }
 
+function clone(source) {
+  var obj = isArray(source) ? [] : {};
+
+  for (var prop in source)
+    if (source.hasOwnProperty(prop))
+      if (isArray(source[prop]) || isObject(source[prop]))
+        obj[prop] = clone(source[prop]);
+      else
+        obj[prop] = source[prop];
+
+  return obj;
+}
+
 function merge(dest, source) {
-  for (var prop in source) {
-    if (source.hasOwnProperty(prop)) {
-      if (!dest[prop]) {
-        dest[prop] = source[prop];
-        continue;
-      }
+  var obj = clone(dest);
 
-      if (isArray(dest[prop]) && isArray(source[prop])) {
-        dest[prop] = dest[prop].concat(source[prop]);
-        continue;
-      }
+  for (var prop in source)
+    if (source.hasOwnProperty(prop))
+      if (!obj[prop])
+        obj[prop] = source[prop];
+      else if (isArray(obj[prop]) && isArray(source[prop]))
+        obj[prop] = obj[prop].concat(source[prop]);
+      else if (isObject(source[prop]) && isObject(obj[prop]))
+        obj[prop] = merge(obj[prop], source[prop]);
+      else
+        obj[prop] = source[prop];
 
-      if (isObject(source[prop]) && isObject(dest[prop])) {
-        dest[prop] = merge(dest[prop], source[prop]);
-        continue;
-      }
-
-      dest[prop] = source[prop];
-    }
-  }
-
-  return dest;
+  return obj;
 }
 
 function findBase(a, b, l) {
@@ -50,9 +57,8 @@ function findBase(a, b, l) {
 }
 
 function createTask(task) {
-  if (!task['dependencies'] && !task['task']) {
+  if (!task['dependencies'] && !task['task'])
     throw new Error('Tasks must either have dependencies or a task function!');
-  }
 
   gulp.task(task['name'], task['dependencies'], task['task']);
 }
@@ -65,24 +71,29 @@ function loadTask(base) {
     var d = path.dirname(r);
     var e = path.extname(b);
     var x = require(f);
+    var t = {};
 
-    var t = {
-      name: (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e)
-    };
+    if (x['config'])
+      if (isFunction(x['config']))
+        t['config'] = x['config'](conf);
+      else
+        t['config'] = merge(conf, x['config']);
+    else
+      t['config'] = merge({}, conf);
 
-    if (isFunction(x)) t.task = x;
-    if (isObject(x)) {
-      t = merge(t, x);
+    if (x['name'])
+      if (isFunction(x['name']))
+        t['name'] = x['name']();
+      else
+        t['name'] = merge(conf, x['config']);
+    else
+      t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
 
-      if (t.hasOwnProperty('config')) {
-        if (isFunction(t['config'])) t['config'](conf);
-        else if (isObject(t.config)) t.config = merge(t['config'], conf);
-        else t['config'] = conf;
-      }
-      else {
-        t['config'] = conf;
-      }
-    }
+    if (x['task'])
+      t['task'] = x['task'];
+
+    if (x['dependencies'])
+      t['dependencies'] = x['dependencies'];
 
     createTask(t);
   };
@@ -109,7 +120,8 @@ var Bootstrap = {
    * @returns {Bootstrap}
    */
   loadTasks: function (paths) {
-    if (!Array.isArray(paths)) paths = [paths];
+    if (!Array.isArray(paths))
+      paths = [paths];
 
     var files = glob.sync(paths).sort();
     var base = files.reduce(function (a, b) {

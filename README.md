@@ -14,8 +14,13 @@ Place your tasks in a separate directory, each task is it's own file. Then, in y
 and load your tasks by calling `loadTasks`.
 
 ```js
+// gulpfile.js
 'use strict';
 
 require('gulp-bootstrap')
   .loadTasks('gulp/tasks/**/*.js');
 ```
+
+## Task definitions
+
+Task files can either export a function to be used as

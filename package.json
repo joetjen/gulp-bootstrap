@@ -27,5 +27,9 @@
   },
   "dependencies": {
     "glob-all": "^3.0.1"
+  },
+  "devDependencies": {
+    "coffee-script-redux": "^2.0.0-beta8",
+    "gulp": "^3.9.0"
   }
 }
