@@ -74,19 +74,7 @@ function loadTask(base) {
 
     if (_.isFunction(x['task']))
       t['task'] = (function (fn) {
-        return function () {
-          console.log('fxt');
-          var r;
-          this.config = c;
-          r = fn.apply(this, arguments);
-          c = this.config;
-
-          return r;
-        };
-      })(x['task']);
-    else if (_.isFunction(x))
-      t['task'] = (function (fn) {
-        return function () {
+        var f = function (next) {
           console.log('fx');
           var r;
           this.config = c;
@@ -95,6 +83,28 @@ function loadTask(base) {
 
           return r;
         };
+
+        if (fn.length === 1)
+          return new Function('a', 'return f.apply(this, arguments)'); // jshint ignore:line
+        else
+          return new Function('return f.apply(this, arguments)'); // jshint ignore:line
+      })(x['task']);
+    else if (_.isFunction(x))
+      t['task'] = (function (fn) {
+        var f = function (next) {
+          console.log('fx');
+          var r;
+          this.config = c;
+          r = fn.apply(this, arguments);
+          c = this.config;
+
+          return r;
+        };
+
+        if (fn.length === 1)
+          return new Function('a', 'return f.apply(this, arguments)'); // jshint ignore:line
+        else
+          return new Function('return f.apply(this, arguments)'); // jshint ignore:line
       })(x);
 
     createTask(t);
