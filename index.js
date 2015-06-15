@@ -3,50 +3,9 @@
 var gulp = require('gulp');
 var glob = require('glob-all');
 var path = require('path');
+var _ = require('underscore');
 
 var conf = {};
-
-function isArray(x) {
-  return Array.isArray(x);
-}
-
-function isObject(x) {
-  return typeof x === 'object';
-}
-
-function isFunction(x) {
-  return typeof x === 'function';
-}
-
-function clone(source) {
-  var obj = isArray(source) ? [] : {};
-
-  for (var prop in source)
-    if (source.hasOwnProperty(prop))
-      if (isArray(source[prop]) || isObject(source[prop]))
-        obj[prop] = clone(source[prop]);
-      else
-        obj[prop] = source[prop];
-
-  return obj;
-}
-
-function merge(dest, source) {
-  var obj = clone(dest);
-
-  for (var prop in source)
-    if (source.hasOwnProperty(prop))
-      if (!obj[prop])
-        obj[prop] = source[prop];
-      else if (isArray(obj[prop]) && isArray(source[prop]))
-        obj[prop] = obj[prop].concat(source[prop]);
-      else if (isObject(source[prop]) && isObject(obj[prop]))
-        obj[prop] = merge(obj[prop], source[prop]);
-      else
-        obj[prop] = source[prop];
-
-  return obj;
-}
 
 function findBase(a, b, l) {
   if (a === b) return a;
@@ -74,18 +33,18 @@ function loadTask(base) {
     var t = {};
 
     if (x['config'])
-      if (isFunction(x['config']))
+      if (_.isFunction(x['config']))
         t['config'] = x['config'](conf);
       else
-        t['config'] = merge(conf, x['config']);
+        t['config'] = _.defaults(x['config'], conf);
     else
-      t['config'] = merge({}, conf);
+      t['config'] = _.defaults({}, conf);
 
     if (x['name'])
-      if (isFunction(x['name']))
+      if (_.isFunction(x['name']))
         t['name'] = x['name']();
       else
-        t['name'] = merge(conf, x['config']);
+        t['name'] = _.defaults(x['config'], conf);
     else
       t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
 
@@ -108,7 +67,7 @@ var Bootstrap = {
    * @returns {Bootstrap}
    */
   config: function (cfg) {
-    conf = merge(conf, cfg);
+    conf = _.extend(conf, cfg);
 
     return this;
   },
@@ -127,6 +86,12 @@ var Bootstrap = {
     var base = files.reduce(function (a, b) {
       return findBase(a, b);
     });
+
+    if (files.length === 1) {
+      base = path.dirname(base);
+    }
+
+    console.log('found base', base);
 
     files.forEach(loadTask(base));
 
