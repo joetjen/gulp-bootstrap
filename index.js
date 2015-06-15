@@ -75,7 +75,6 @@ function loadTask(base) {
     if (_.isFunction(x['task']))
       t['task'] = (function (fn) {
         var f = function (next) {
-          console.log('fx');
           var r;
           this.config = c;
           r = fn.apply(this, arguments);
@@ -94,7 +93,6 @@ function loadTask(base) {
     else if (_.isFunction(x))
       t['task'] = (function (fn) {
         var f = function (next) {
-          console.log('fx');
           var r;
           this.config = c;
           r = fn.apply(this, arguments);
