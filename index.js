@@ -52,7 +52,10 @@ function loadTask(base) {
       t['task'] = x['task'];
 
     if (x['dependencies'])
-      t['dependencies'] = x['dependencies'];
+      if (_.isArray(x['dependencies']))
+        t['dependencies'] = x['dependencies'];
+      else
+        t['dependencies'] = [x['dependencies']];
 
     createTask(t);
   };
