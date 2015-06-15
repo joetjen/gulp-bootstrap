@@ -32,19 +32,11 @@ function loadTask(base) {
     var x = require(f);
     var t = {};
 
-    if (x['config'])
-      if (_.isFunction(x['config']))
-        t['config'] = x['config'](conf);
-      else
-        t['config'] = _.defaults(x['config'], conf);
-    else
-      t['config'] = _.defaults({}, conf);
-
     if (x['name'])
       if (_.isFunction(x['name']))
         t['name'] = x['name']();
       else
-        t['name'] = _.defaults(x['config'], conf);
+        t['name'] = x['name'];
     else
       t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
 
@@ -56,6 +48,14 @@ function loadTask(base) {
         t['dependencies'] = x['dependencies'];
       else
         t['dependencies'] = [x['dependencies']];
+
+    if (x['config'])
+      if (_.isFunction(x['config']))
+        t['name']['config'] = x['config'](conf);
+      else
+        t['name']['config'] = _.defaults(x['config'], conf);
+    else
+      t['name']['config'] = _.defaults({}, conf);
 
     createTask(t);
   };
