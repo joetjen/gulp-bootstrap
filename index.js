@@ -46,7 +46,7 @@ function loadTask(base) {
         t['name'] = (function (fn) {
           var r;
           this.config = c;
-          r = fn.apply(this, arguments);
+          r = fn.call(this);
           c = this.config;
 
           return r;
@@ -61,7 +61,7 @@ function loadTask(base) {
         t['dependencies'] = (function (fn) {
           var r;
           this.config = c;
-          r = fn.apply(this, arguments);
+          r = fn.call(this);
           c = this.config;
 
           return r;
@@ -72,9 +72,10 @@ function loadTask(base) {
     if (t['dependencies'] && !_.isArray(t['dependencies']))
       t['dependencies'] = [t['dependencies']];
 
-    if (x['task'])
+    if (_.isFunction(x['task']))
       t['task'] = (function (fn) {
         return function () {
+          console.log('fxt');
           var r;
           this.config = c;
           r = fn.apply(this, arguments);
@@ -86,6 +87,7 @@ function loadTask(base) {
     else if (_.isFunction(x))
       t['task'] = (function (fn) {
         return function () {
+          console.log('fx');
           var r;
           this.config = c;
           r = fn.apply(this, arguments);
