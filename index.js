@@ -57,18 +57,14 @@ function loadTask(base) {
 
     if (x['task'])
       t['task'] = (function (fn) {
-        console.log('fn of x[task]');
         return function () {
-          console.log('fn ->', this);
           this.config = c;
           return fn.apply(this, arguments);
         };
       })(x['task']);
     else if (_.isFunction(x))
       t['task'] = (function (fn) {
-        console.log('fn of x');
         return function () {
-          console.log('fn ->', this);
           this.config = c;
           return fn.apply(this, arguments);
         };
