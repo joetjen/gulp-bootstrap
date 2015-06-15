@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joetjen/gulp-tasks.git"
+    "url": "git+https://github.com/joetjen/gulp-bootstrap.git"
   },
   "keywords": [
     "gulp",
@@ -19,9 +19,9 @@
   "author": "Jan Oetjen <oetjenj@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/joetjen/gulp-tasks/issues"
+    "url": "https://github.com/joetjen/gulp-bootstrap/issues"
   },
-  "homepage": "https://github.com/joetjen/gulp-tasks#readme",
+  "homepage": "https://github.com/joetjen/gulp-bootstrap#readme",
   "peerDependencies": {
     "gulp": "^3.9.0"
   },
@@ -29,7 +29,6 @@
     "glob-all": "^3.0.1"
   },
   "devDependencies": {
-    "coffee-script-redux": "^2.0.0-beta8",
     "gulp": "^3.9.0"
   }
 }
