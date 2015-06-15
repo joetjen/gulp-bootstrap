@@ -175,6 +175,10 @@ module.exports.task = function (next) {
 
 ## Changelog
 
+### v0.1.3
+
+Fixed missing version tag.
+
 ### v0.1.2
 
 Fixed problem with task naming and and task config.
