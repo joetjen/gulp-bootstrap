@@ -43,30 +43,55 @@ function loadTask(base) {
 
     if (x['name'])
       if (_.isFunction(x['name']))
-        t['name'] = x['name'](c);
+        t['name'] = (function (fn) {
+          var r;
+          this.config = c;
+          r = fn.apply(this, arguments);
+          c = this.config;
+
+          return r;
+        })(x['name']);
       else
         t['name'] = x['name'];
     else
       t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
 
     if (x['dependencies'])
-      if (_.isArray(x['dependencies']))
-        t['dependencies'] = x['dependencies'];
+      if (_.isFunction(x['dependencies']))
+        t['dependencies'] = (function (fn) {
+          var r;
+          this.config = c;
+          r = fn.apply(this, arguments);
+          c = this.config;
+
+          return r;
+        })(x['dependencies']);
       else
-        t['dependencies'] = [x['dependencies']];
+        t['dependencies'] = x['dependencies'];
+
+    if (t['dependencies'] && !_.isArray(t['dependencies']))
+      t['dependencies'] = [t['dependencies']];
 
     if (x['task'])
       t['task'] = (function (fn) {
         return function () {
+          var r;
           this.config = c;
-          return fn.apply(this, arguments);
+          r = fn.apply(this, arguments);
+          c = this.config;
+
+          return r;
         };
       })(x['task']);
     else if (_.isFunction(x))
       t['task'] = (function (fn) {
         return function () {
+          var r;
           this.config = c;
-          return fn.apply(this, arguments);
+          r = fn.apply(this, arguments);
+          c = this.config;
+
+          return r;
         };
       })(x);
 

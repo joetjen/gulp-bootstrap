@@ -44,7 +44,8 @@ Forcing a task name is purely optional and not advised unless absolutely necessa
 Tasks are named based on their path relative to the task base directory. For example, let's assume your tasks files
 are placed within './gulp/tasks'. A file named placed at './gulp/tasks/task1.js' will have a default name of 'task1'
 while a file placed at './gulp/tasks/do/something.js' will have a default name of 'do:something'. You can also use
-a function as the 'name' property which gets called to generate the name (the config is available as parameter).
+a function as the 'name' property which gets called to generate the name. Inside the function the config is available
+with 'this.config'.
 
 Additionally task names can be forced by exporting a 'name' property in you task file like:
 
@@ -66,8 +67,8 @@ or as function
 // file ./gulp/tasks/do/something.js
 'use strict';
 
-module.exports.name = function (config) {
-  return 'i-am-doing-something';
+module.exports.name = function () {
+  return this.config.prefix + 'i-am-doing-something';
 }
 
 module.exports.task = function (next) {
@@ -80,7 +81,7 @@ module.exports.task = function (next) {
 ### Task functions
 
 The task function to be executed can be either exported directly or as 'task' property. A 'task' property takes
-precedence over a directly exported function.
+precedence over a directly exported function. Inside the function the config is available with 'this.config'.
 
 ```js
 // file ./gulp/tasks/do/something.js
@@ -109,7 +110,8 @@ module.exports = function (next) {
 ### Task dependencies
 
 Task dependencies can be exported as 'dependencies' property. They dependencies must be either a string (i.e. only
-one dependency exists) or as array of strings.
+one dependency exists) or as array of strings. The 'dependencies' property can also be a function which must return
+either an array or string. Inside the function the config is available with 'this.config'.
 
 ```js
 // file ./gulp/tasks/do/something.js
@@ -125,6 +127,17 @@ or more simplier
 'use strict';
 
 module.exports.dependencies = 'do:something-before';
+```
+
+or as function
+
+```js
+// file ./gulp/tasks/do/something.js
+'use strict';
+
+module.exports.dependencies = function () {
+  return 'do:something-before';
+};
 ```
 
 ### Task configuration
