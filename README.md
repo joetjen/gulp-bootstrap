@@ -79,7 +79,8 @@ module.exports.task = function (next) {
 
 ### Task functions
 
-The task function to be executed can be either exported directly or as 'task' property.
+The task function to be executed can be either exported directly or as 'task' property. A 'task' property takes
+precedence over a directly exported function.
 
 ```js
 // file ./gulp/tasks/do/something.js
@@ -174,6 +175,10 @@ module.exports.task = function (next) {
 ```
 
 ## Changelog
+
+### v0.1.4
+
+Only apply config to task function if task function exists
 
 ### v0.1.3
 
