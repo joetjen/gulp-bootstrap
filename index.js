@@ -94,8 +94,6 @@ var Bootstrap = {
       base = path.dirname(base);
     }
 
-    console.log('found base', base);
-
     files.forEach(loadTask(base));
 
     return this;
