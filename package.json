@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "glob-all": "^3.0.1",
-    "underscore": "^1.8.3"
+    "lodash": "^3.9.3"
   },
   "devDependencies": {
     "gulp": "^3.9.0"

@@ -3,7 +3,7 @@
 var gulp = require('gulp');
 var glob = require('glob-all');
 var path = require('path');
-var _ = require('underscore');
+var _ = require('lodash');
 
 var conf = {};
 
@@ -35,11 +35,11 @@ function loadTask(base) {
 
     if (x['config'])
       if (_.isFunction(x['config']))
-        c = x['config'](_.clone(conf));
+        c = x['config'](_.cloneDeep(conf));
       else
-        c = _.defaults(x['config'], conf);
+        c = _.merge({}, conf, x['config']);
     else
-      c = _.defaults({}, conf);
+      c = _.merge({}, conf);
 
     if (x['name'])
       if (_.isFunction(x['name']))
@@ -49,19 +49,30 @@ function loadTask(base) {
     else
       t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
 
-    if (x['task'])
-      t['task'] = x['task'];
-    else if (_.isFunction(x))
-      t['task'] = x['task'];
-
     if (x['dependencies'])
       if (_.isArray(x['dependencies']))
         t['dependencies'] = x['dependencies'];
       else
         t['dependencies'] = [x['dependencies']];
 
-    if (t['task'])
-      t['task']['config'] = c;
+    if (x['task'])
+      t['task'] = (function (fn) {
+        console.log('fn of x[task]');
+        return function () {
+          console.log('fn ->', this);
+          this.config = c;
+          return fn.apply(this, arguments);
+        };
+      })(x['task']);
+    else if (_.isFunction(x))
+      t['task'] = (function (fn) {
+        console.log('fn of x');
+        return function () {
+          console.log('fn ->', this);
+          this.config = c;
+          return fn.apply(this, arguments);
+        };
+      })(x);
 
     createTask(t);
   };
@@ -76,7 +87,7 @@ var Bootstrap = {
    * @returns {Bootstrap}
    */
   config: function (cfg) {
-    conf = _.extend(conf, cfg);
+    conf = _.merge({}, conf, cfg);
 
     return this;
   },
