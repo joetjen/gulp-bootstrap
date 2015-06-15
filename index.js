@@ -84,10 +84,12 @@ function loadTask(base) {
           return r;
         };
 
-        if (fn.length === 1)
-          return new Function('a', 'return f.apply(this, arguments)'); // jshint ignore:line
-        else
-          return new Function('return f.apply(this, arguments)'); // jshint ignore:line
+        if (fn.length === 1) return function (a) {
+          return f.apply(this, arguments);
+        };
+        else return function () {
+          return f.apply(this, arguments);
+        };
       })(x['task']);
     else if (_.isFunction(x))
       t['task'] = (function (fn) {
@@ -101,10 +103,12 @@ function loadTask(base) {
           return r;
         };
 
-        if (fn.length === 1)
-          return new Function('a', 'return f.apply(this, arguments)'); // jshint ignore:line
-        else
-          return new Function('return f.apply(this, arguments)'); // jshint ignore:line
+        if (fn.length === 1) return function (a) {
+          return f.apply(this, arguments);
+        };
+        else return function () {
+          return f.apply(this, arguments);
+        };
       })(x);
 
     createTask(t);
