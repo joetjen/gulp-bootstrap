@@ -93,10 +93,10 @@ function loadTask(base) {
     else
       t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
 
-    t = getProperty.call(this, 'dependencies', x, t, c);
-    t = getProperty.call(this, 'help', x, t, c);
-    t = getProperty.call(this, 'aliases', x, t, c);
-    t = getProperty.call(this, 'options', x, t, c);
+    t = getProperty('dependencies', x, t, c);
+    t = getProperty('help', x, t, c);
+    t = getProperty('aliases', x, t, c);
+    t = getProperty('options', x, t, c);
 
     if (t['dependencies'] && !_.isArray(t['dependencies']))
       t['dependencies'] = [t['dependencies']];
@@ -104,12 +104,8 @@ function loadTask(base) {
     if (_.isFunction(x['task']))
       t['task'] = (function (fn) {
         var f = function (next) {
-          var r;
           this.config = c;
-          r = fn.apply(this, arguments);
-          c = this.config;
-
-          return r;
+          return fn.apply(this, arguments);
         };
 
         if (fn.length === 1) return function (a) {
@@ -122,12 +118,8 @@ function loadTask(base) {
     else if (_.isFunction(x))
       t['task'] = (function (fn) {
         var f = function (next) {
-          var r;
           this.config = c;
-          r = fn.apply(this, arguments);
-          c = this.config;
-
-          return r;
+          return fn.apply(this, arguments);
         };
 
         if (fn.length === 1) return function (a) {
@@ -145,11 +137,7 @@ function loadTask(base) {
 function getProperty(prop, x, t, c) {
   if (x[prop])
     if (_.isFunction(x[prop]))
-      t[prop] = (function (fn) {
-        this.config = c;
-
-        return fn.call(this);
-      })(x[prop]);
+      t[prop] = x[prop].call({config: c});
     else
       t[prop] = x[prop];
 
