@@ -160,15 +160,17 @@ function createTask(task) {
   if (!task['dependencies'] && !task['task'])
     throw new Error('Tasks must either have dependencies or a task function!');
 
+  var opts = {};
+
+  if (task['aliases']) opts['aliases'] = task['aliases'];
+  if (task['options']) opts['options'] = task['options'];
+
   var args = _.flatten([
     task['name'],
     task['help'],
     task['deps'],
     task['task'],
-    {
-      aliases: task['alises'],
-      options: task['options']
-    }
+    opts
   ]);
 
   gulp.task.apply(gulp, args);
