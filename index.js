@@ -13,7 +13,6 @@ module.exports = {
   /**
    *
    * @param cfg
-   * @returns this
    */
   config: function (cfg) {
     config.call(this, cfg);
@@ -24,7 +23,6 @@ module.exports = {
   /**
    *
    * @param paths
-   * @returns this
    */
   loadTasks: function (paths) {
     loadTasks.call(this, paths);
