@@ -10,8 +10,14 @@ var gulp = require('gulp-help')(require('gulp'), {
 var conf = {};
 
 var bootstrap = {
-  config: config,
-  loadTasks: loadTasks
+  config: function () {
+    config.apply(this, arguments);
+    return this;
+  },
+  loadTasks: function () {
+    loadTasks.apply(this, arguments);
+    return this;
+  }
 };
 
 module.exports = bootstrap;
@@ -26,8 +32,6 @@ module.exports = bootstrap;
  */
 function config(cfg) {
   conf = _.merge({}, conf, cfg);
-
-  return bootstrap;
 }
 
 /**
@@ -46,8 +50,6 @@ function loadTasks(paths) {
   if (files.length === 1) base = path.dirname(base);
 
   files.forEach(loadTask(base));
-
-  return bootstrap;
 }
 
 function findBase(a, b) {
