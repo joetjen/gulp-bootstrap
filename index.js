@@ -1,25 +1,63 @@
 'use strict';
 
-var gulp = require('gulp');
 var glob = require('glob-all');
 var path = require('path');
 var _ = require('lodash');
+var gulp = require('gulp-help')(require('gulp'), {
+  hideEmpty: true
+});
 
 var conf = {};
 
-function findBase(a, b, l) {
-  if (a === b) return a;
+var bootstrap = {
+  config: config,
+  loadTasks: loadTasks
+};
 
-  l = l ? l - 1 : (a.length > b.length ? b.length : a.length);
+module.exports = bootstrap;
 
-  return findBase(a.substr(0, l), b.substr(0, l), l);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Merge `cfg` into the current configuration.
+ *
+ * @param {Object} cfg A configuration object
+ * @returns {{config: config, loadTasks: loadTasks}}
+ */
+function config(cfg) {
+  conf = _.merge({}, conf, cfg);
+
+  return bootstrap;
 }
 
-function createTask(task) {
-  if (!task['dependencies'] && !task['task'])
-    throw new Error('Tasks must either have dependencies or a task function!');
+/**
+ * Load tasks from paths.
+ *
+ * @param {string|string[]} paths A path or an array of paths
+ * @returns {{config: config, loadTasks: loadTasks}}
+ */
+function loadTasks(paths) {
+  if (!_.isArray(paths))
+    paths = [paths];
 
-  gulp.task(task['name'], task['dependencies'], task['task']);
+  var files = glob.sync(paths).sort();
+  var base = _.reduce(files, findBase);
+
+  if (files.length === 1) base = path.dirname(base);
+
+  files.forEach(loadTask(base));
+
+  return bootstrap;
+}
+
+function findBase(a, b) {
+  return (function f(a, b, l) {
+    if (a === b) return a;
+
+    l = l ? l - 1 : (a.length > b.length ? b.length : a.length);
+
+    return f(a.substr(0, l), b.substr(0, l), l);
+  })(a, b);
 }
 
 function loadTask(base) {
@@ -56,18 +94,10 @@ function loadTask(base) {
     else
       t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
 
-    if (x['dependencies'])
-      if (_.isFunction(x['dependencies']))
-        t['dependencies'] = (function (fn) {
-          var r;
-          this.config = c;
-          r = fn.call(this);
-          c = this.config;
-
-          return r;
-        })(x['dependencies']);
-      else
-        t['dependencies'] = x['dependencies'];
+    t = getProperty('dependencies', x, t, c);
+    t = getProperty('help', x, t, c);
+    t = getProperty('aliases', x, t, c);
+    t = getProperty('options', x, t, c);
 
     if (t['dependencies'] && !_.isArray(t['dependencies']))
       t['dependencies'] = [t['dependencies']];
@@ -113,44 +143,34 @@ function loadTask(base) {
   };
 }
 
-var Bootstrap = {
+function getProperty(prop, x, t, c) {
+  if (x[prop])
+    if (_.isFunction(x[prop]))
+      t[prop] = (function (fn) {
+        this.config = c;
 
-  /**
-   * Merge `cfg` into the current configuration.
-   *
-   * @param {Object} cfg A configuration object
-   * @returns {Bootstrap}
-   */
-  config: function (cfg) {
-    conf = _.merge({}, conf, cfg);
+        return fn.call(this);
+      })(x[prop]);
+    else
+      t[prop] = x[prop];
 
-    return this;
-  },
+  return t;
+}
 
-  /**
-   * Load tasks from paths.
-   *
-   * @param {string|string[]} paths A path or an array of paths
-   * @returns {Bootstrap}
-   */
-  loadTasks: function (paths) {
-    if (!Array.isArray(paths))
-      paths = [paths];
+function createTask(task) {
+  if (!task['dependencies'] && !task['task'])
+    throw new Error('Tasks must either have dependencies or a task function!');
 
-    var files = glob.sync(paths).sort();
-    var base = files.reduce(function (a, b) {
-      return findBase(a, b);
-    });
-
-    if (files.length === 1) {
-      base = path.dirname(base);
+  var args = _.flatten([
+    task['name'],
+    task['help'],
+    task['deps'],
+    task['task'],
+    {
+      aliases: task['alises'],
+      options: task['options']
     }
+  ]);
 
-    files.forEach(loadTask(base));
-
-    return this;
-  }
-
-};
-
-module.exports = Bootstrap;
+  gulp.task.apply(gulp, args);
+}
