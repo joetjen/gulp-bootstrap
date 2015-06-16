@@ -9,21 +9,22 @@ var gulp = require('gulp-help')(require('gulp'), {
 
 var conf = {};
 
-var bootstrap = {
+module.exports = {
   /**
    *
    * @param cfg
-   * @returns {bootstrap}
+   * @returns {exports}
    */
   config: function (cfg) {
     config.call(this, cfg);
 
     return this;
   },
+
   /**
    *
    * @param paths
-   * @returns {bootstrap}
+   * @returns {exports}
    */
   loadTasks: function (paths) {
     loadTasks.call(this, paths);
@@ -31,8 +32,6 @@ var bootstrap = {
     return this;
   }
 };
-
-module.exports = bootstrap;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
