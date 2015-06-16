@@ -3,7 +3,9 @@
 var glob = require('glob-all');
 var path = require('path');
 var _ = require('lodash');
-var gulp = require('gulp-help')(require('gulp'));
+var gulp = require('gulp-help')(require('gulp'), {
+  hideEmpty: true
+});
 
 var conf = {};
 
