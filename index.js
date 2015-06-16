@@ -93,10 +93,10 @@ function loadTask(base) {
     else
       t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
 
-    t = getProperty('dependencies', x, t, c);
-    t = getProperty('help', x, t, c);
-    t = getProperty('aliases', x, t, c);
-    t = getProperty('options', x, t, c);
+    t = getProperty.call(this, 'dependencies', x, t, c);
+    t = getProperty.call(this, 'help', x, t, c);
+    t = getProperty.call(this, 'aliases', x, t, c);
+    t = getProperty.call(this, 'options', x, t, c);
 
     if (t['dependencies'] && !_.isArray(t['dependencies']))
       t['dependencies'] = [t['dependencies']];
