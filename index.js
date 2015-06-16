@@ -10,12 +10,24 @@ var gulp = require('gulp-help')(require('gulp'), {
 var conf = {};
 
 var bootstrap = {
-  config: function () {
-    config.apply(this, arguments);
+  /**
+   *
+   * @param cfg
+   * @returns {bootstrap}
+   */
+  config: function (cfg) {
+    config.call(this, cfg);
+
     return this;
   },
-  loadTasks: function () {
-    loadTasks.apply(this, arguments);
+  /**
+   *
+   * @param paths
+   * @returns {bootstrap}
+   */
+  loadTasks: function (paths) {
+    loadTasks.call(this, paths);
+
     return this;
   }
 };
@@ -24,22 +36,10 @@ module.exports = bootstrap;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * Merge `cfg` into the current configuration.
- *
- * @param {Object} cfg A configuration object
- * @returns {{config: config, loadTasks: loadTasks}}
- */
 function config(cfg) {
   conf = _.merge({}, conf, cfg);
 }
 
-/**
- * Load tasks from paths.
- *
- * @param {string|string[]} paths A path or an array of paths
- * @returns {{config: config, loadTasks: loadTasks}}
- */
 function loadTasks(paths) {
   if (!_.isArray(paths))
     paths = [paths];
