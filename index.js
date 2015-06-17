@@ -156,7 +156,7 @@ function createTask(task) {
   var args = _.flatten([
     task['name'],
     task['help'],
-    task['deps'],
+    task['dependencies'],
     task['task'],
     opts
   ]);
