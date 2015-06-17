@@ -98,8 +98,8 @@ function loadTask(base) {
     t = getProperty('aliases', x, t, c);
     t = getProperty('options', x, t, c);
 
-    if (t['dependencies'] && !_.isArray(t['dependencies']))
-      t['dependencies'] = [t['dependencies']];
+    if (t['dependencies'])
+      t['dependencies'] = _.flatten([t['dependencies']]);
 
     if (_.isFunction(x['task']))
       t['task'] = (function (fn) {
