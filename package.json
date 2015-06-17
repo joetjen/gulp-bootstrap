@@ -1,6 +1,6 @@
 {
   "name": "gulp-bootstrap",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A simple gulp task loader.",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "glob-all": "^3.0.1",
-    "underscore": "^1.8.3"
+    "gulp-help": "^1.6.0",
+    "lodash": "^3.9.3"
   },
   "devDependencies": {
     "gulp": "^3.9.0"
