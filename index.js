@@ -7,10 +7,12 @@ var gulp = require('gulp-help')(require('gulp'), {
   hideEmpty: true
 });
 
-var conf = {};
+var conf        = {};
+var ignoreEmpty = false;
 
 module.exports = {
   /**
+   * Set the configuration for tasks.
    *
    * @param cfg
    */
@@ -21,6 +23,16 @@ module.exports = {
   },
 
   /**
+   * Allow empty tasks.
+   *
+   * @param ignore
+     */
+  ignoreEmpty: function (ignore) {
+    ignoreEmpty = ignore;
+  },
+
+  /**
+   * Load tasks from paths.
    *
    * @param paths
    */
@@ -145,8 +157,13 @@ function getProperty(prop, x, t, c) {
 }
 
 function createTask(task) {
-  if (!task['dependencies'] && !task['task'])
+  if (!task['dependencies'] && !task['task']) {
+    if (ignoreEmpty) {
+      return;
+    }
+
     throw new Error('Tasks must either have dependencies or a task function!');
+  }
 
   var opts = {};
 
