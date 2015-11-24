@@ -98,8 +98,8 @@ function loadTask(base) {
     t = getProperty('aliases', x, t, c);
     t = getProperty('options', x, t, c);
 
-    if (t['dependencies'] && !_.isArray(t['dependencies']))
-      t['dependencies'] = [t['dependencies']];
+    if (t['dependencies'])
+      t['dependencies'] = _.flatten([t['dependencies']]);
 
     if (_.isFunction(x['task']))
       t['task'] = (function (fn) {
@@ -153,13 +153,13 @@ function createTask(task) {
   if (task['aliases']) opts['aliases'] = task['aliases'];
   if (task['options']) opts['options'] = task['options'];
 
-  var args = _.flatten([
+  var args = [
     task['name'],
     task['help'],
     task['dependencies'],
     task['task'],
     opts
-  ]);
+  ];
 
   gulp.task.apply(gulp, args);
 }

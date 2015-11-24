@@ -1,11 +1,11 @@
-# gulp-bootstrap
+# gulp-tasks-bootstrap
 
 A simple gulp task loader.
 
 ## Install
 
 ```sh
-npm install --save-dev gulp-bootstrap
+npm install --save-dev gulp-tasks-bootstrap
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ require('gulp-bootstrap')
   .loadTasks('gulp/tasks/**/*.js');
 ```
 
-To make a globaly configuration available to all tasks simple use the 'config' function before loading the tasks. What
+To make a globaly configuration available to all tasks simple use the `config` function before loading the tasks. What
 you do with the configuration inside the tasks is entirely up to you.
 
 ```js
@@ -42,12 +42,12 @@ Forcing a task name is purely optional and not advised unless absolutely necessa
 
 ### Task names
 Tasks are named based on their path relative to the task base directory. For example, let's assume your tasks files
-are placed within './gulp/tasks'. A file named placed at './gulp/tasks/task1.js' will have a default name of 'task1'
-while a file placed at './gulp/tasks/do/something.js' will have a default name of 'do:something'. You can also use
-a function as the 'name' property which gets called to generate the name. Inside the function the config is available
-with 'this.config'.
+are placed within `./gulp/tasks`. A file named placed at `./gulp/tasks/task1.js` will have a default name of `task1`
+while a file placed at `./gulp/tasks/do/something.js` will have a default name of `do:something`. You can also use
+a function as the `name` property which gets called to generate the name. Inside the function the config is available
+with `this.config`.
 
-Additionally task names can be forced by exporting a 'name' property in you task file like:
+Additionally task names can be forced by exporting a `name` property in you task file like:
 
 ```js
 // file ./gulp/tasks/do/something.js
@@ -80,8 +80,8 @@ module.exports.task = function (next) {
 
 ### Task functions
 
-The task function to be executed can be either exported directly or as 'task' property. A 'task' property takes
-precedence over a directly exported function. Inside the function the config is available with 'this.config'.
+The task function to be executed can be either exported directly or as `task` property. A `task` property takes
+precedence over a directly exported function. Inside the function the config is available with `this.config`.
 
 ```js
 // file ./gulp/tasks/do/something.js
@@ -109,9 +109,9 @@ module.exports = function (next) {
 
 ### Task dependencies
 
-Task dependencies can be exported as 'dependencies' property. They dependencies must be either a string (i.e. only
-one dependency exists) or as array of strings. The 'dependencies' property can also be a function which must return
-either an array or string. Inside the function the config is available with 'this.config'.
+Task dependencies can be exported as `dependencies` property. They dependencies must be either a string (i.e. only
+one dependency exists) or as array of strings. The `dependencies` property can also be a function which must return
+either an array or string. Inside the function the config is available with `this.config`.
 
 ```js
 // file ./gulp/tasks/do/something.js
@@ -142,7 +142,7 @@ module.exports.dependencies = function () {
 
 ### Task configuration
 
-Tasks will receive a 'config' property which is the config set as bootstrap config. If you export a 'config' property
+Tasks will receive a `config` property which is the config set as bootstrap config. If you export a `config` property
 without your task definition is it either used as default (and thus getting overriden by the global config) in case
 you exported an object or, if you exported a function, the function gets called with the global config as paramenter.
 
@@ -187,24 +187,30 @@ module.exports.task = function (next) {
 };
 ```
 
-## Changelog
+## LICENSE
 
-### v0.1.4
+Copyright (c) 2015 Jan Oetjen <oetjenj@gmail.com>
 
-Only apply config to task function if task function exists
 
-### v0.1.3
 
-Fixed missing version tag.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-### v0.1.2
 
-Fixed problem with task naming and and task config.
 
-### v0.1.1
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-Removed obsolete console.log
 
-### v0.1.0
 
-First release.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
