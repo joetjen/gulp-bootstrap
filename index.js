@@ -29,6 +29,8 @@ module.exports = {
      */
   ignoreEmpty: function (ignore) {
     ignoreEmpty = ignore;
+
+    return this;
   },
 
   /**
