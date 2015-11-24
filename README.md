@@ -187,6 +187,20 @@ module.exports.task = function (next) {
 };
 ```
 
+## Empty tasks
+
+By default `gulp-tasks-bootstrap` will throw an error when a task file contains neither a `task` nor a `dependencies`
+property. If you want to allow, but ignore, such files instead you can use the `ignoreEmpty()` function like:
+
+```js
+// ./gulpfile.js
+'use strict';
+
+require('gulp-bootstrap')
+  .ignoreEmpty(true)
+  .loadTasks('gulp/tasks/**/*.js');
+```
+
 ## LICENSE
 
 Copyright (c) 2015 Jan Oetjen <oetjenj@gmail.com>
