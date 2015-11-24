@@ -1,5 +1,5 @@
 {
-  "name": "gulp-bootstrap",
+  "name": "gulp-tasks-bootstrap",
   "version": "0.1.5",
   "description": "A simple gulp task loader.",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joetjen/gulp-bootstrap.git"
+    "url": "git+https://github.com/joetjen/gulp-tasks-bootstrap.git"
   },
   "keywords": [
     "gulp",
@@ -17,11 +17,11 @@
     "tasks"
   ],
   "author": "Jan Oetjen <oetjenj@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/joetjen/gulp-bootstrap/issues"
+    "url": "https://github.com/joetjen/gulp-tasks-bootstrap/issues"
   },
-  "homepage": "https://github.com/joetjen/gulp-bootstrap#readme",
+  "homepage": "https://github.com/joetjen/gulp-tasks-bootstrap#readme",
   "peerDependencies": {
     "gulp": "^3.9.0"
   },
