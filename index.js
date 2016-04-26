@@ -125,13 +125,13 @@ function loadTask (base) {
 
     if (_.isFunction(x['task'])) {
       t['task'] = (function (fn) {
-        let f = function (next) {
+        let f = function () {
           this.config = c
           return fn.apply(this, arguments)
         }
 
         if (fn.length === 1) {
-          return function (a) {
+          return function () {
             return f.apply(this, arguments)
           }
         } else {
@@ -142,13 +142,13 @@ function loadTask (base) {
       })(x['task'])
     } else if (_.isFunction(x)) {
       t['task'] = (function (fn) {
-        let f = function (next) {
+        let f = function () {
           this.config = c
           return fn.apply(this, arguments)
         }
 
         if (fn.length === 1) {
-          return function (a) {
+          return function () {
             return f.apply(this, arguments)
           }
         } else {
@@ -159,7 +159,7 @@ function loadTask (base) {
       })(x)
     } else {
       if (t['dependencies']) {
-        let deps = [t['dependencies']]
+        let deps = t['dependencies']
 
         t['dependencies'] = []
         t['task'] = function (next) {
