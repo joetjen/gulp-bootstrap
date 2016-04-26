@@ -1,14 +1,16 @@
-'use strict';
+'use strict'
 
-var glob = require('glob-all');
-var path = require('path');
-var _ = require('lodash');
-var gulp = require('gulp-help')(require('gulp'), {
+let prequire = require('parent-require')
+let glob = require('glob-all')
+let path = require('path')
+let _ = require('lodash')
+let gulp = require('gulp-help')(prequire('gulp'), {
   hideEmpty: true
-});
+})
+let runSequence = require('run-sequence').use(gulp)
 
-var conf        = {};
-var ignoreEmpty = false;
+let conf = {}
+let ignoreEmpty = false
 
 module.exports = {
   /**
@@ -17,20 +19,20 @@ module.exports = {
    * @param cfg
    */
   config: function (cfg) {
-    config.call(this, cfg);
+    config.call(this, cfg)
 
-    return this;
+    return this
   },
 
   /**
    * Allow empty tasks.
    *
    * @param ignore
-     */
+   */
   ignoreEmpty: function (ignore) {
-    ignoreEmpty = ignore;
+    ignoreEmpty = ignore
 
-    return this;
+    return this
   },
 
   /**
@@ -39,146 +41,170 @@ module.exports = {
    * @param paths
    */
   loadTasks: function (paths) {
-    loadTasks.call(this, paths);
+    loadTasks.call(this, paths)
 
-    return this;
+    return this
   }
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function config(cfg) {
-  conf = _.merge({}, conf, cfg);
 }
 
-function loadTasks(paths) {
-  if (!_.isArray(paths))
-    paths = [paths];
-
-  var files = glob.sync(paths).sort();
-  var base = _.reduce(files, findBase);
-
-  if (files.length === 1) base = path.dirname(base);
-
-  files.forEach(loadTask(base));
+function config (cfg) {
+  conf = _.merge({}, conf, cfg)
 }
 
-function findBase(a, b) {
-  return (function f(a, b, l) {
-    if (a === b) return a;
+function loadTasks (paths) {
+  if (!_.isArray(paths)) {
+    paths = [paths]
+  }
 
-    l = l ? l - 1 : (a.length > b.length ? b.length : a.length);
+  let files = glob.sync(paths).sort()
+  let base = _.reduce(files, findBase)
 
-    return f(a.substr(0, l), b.substr(0, l), l);
-  })(a, b);
+  if (files.length === 1) base = path.dirname(base)
+
+  files.forEach(loadTask(base))
 }
 
-function loadTask(base) {
-  return function (file) {
-    var r = path.relative(base, file);
-    var f = path.join(process.cwd(), file);
-    var b = path.basename(r);
-    var d = path.dirname(r);
-    var e = path.extname(b);
-    var x = require(f);
-    var t = {};
-    var c = {};
-
-    if (x['config'])
-      if (_.isFunction(x['config']))
-        c = x['config'](_.cloneDeep(conf));
-      else
-        c = _.merge({}, conf, x['config']);
-    else
-      c = _.merge({}, conf);
-
-    if (x['name'])
-      if (_.isFunction(x['name']))
-        t['name'] = (function (fn) {
-          var r;
-          this.config = c;
-          r = fn.call(this);
-          c = this.config;
-
-          return r;
-        })(x['name']);
-      else
-        t['name'] = x['name'];
-    else
-      t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e);
-
-    t = getProperty('dependencies', x, t, c);
-    t = getProperty('help', x, t, c);
-    t = getProperty('aliases', x, t, c);
-    t = getProperty('options', x, t, c);
-
-    if (t['dependencies'])
-      t['dependencies'] = _.flatten([t['dependencies']]);
-
-    if (_.isFunction(x['task']))
-      t['task'] = (function (fn) {
-        var f = function (next) {
-          this.config = c;
-          return fn.apply(this, arguments);
-        };
-
-        if (fn.length === 1) return function (a) {
-          return f.apply(this, arguments);
-        };
-        else return function () {
-          return f.apply(this, arguments);
-        };
-      })(x['task']);
-    else if (_.isFunction(x))
-      t['task'] = (function (fn) {
-        var f = function (next) {
-          this.config = c;
-          return fn.apply(this, arguments);
-        };
-
-        if (fn.length === 1) return function (a) {
-          return f.apply(this, arguments);
-        };
-        else return function () {
-          return f.apply(this, arguments);
-        };
-      })(x);
-
-    createTask(t);
-  };
-}
-
-function getProperty(prop, x, t, c) {
-  if (x[prop])
-    if (_.isFunction(x[prop]))
-      t[prop] = x[prop].call({config: c});
-    else
-      t[prop] = x[prop];
-
-  return t;
-}
-
-function createTask(task) {
-  if (!task['dependencies'] && !task['task']) {
-    if (ignoreEmpty) {
-      return;
+function findBase (a, b) {
+  return (function f (a, b, l) {
+    if (a === b) {
+      return a
     }
 
-    throw new Error('Tasks must either have dependencies or a task function!');
+    l = l ? l - 1 : (a.length > b.length ? b.length : a.length)
+
+    return f(a.substr(0, l), b.substr(0, l), l)
+  })(a, b)
+}
+
+function loadTask (base) {
+  return function (file) {
+    let r = path.relative(base, file)
+    let f = path.join(process.cwd(), file)
+    let b = path.basename(r)
+    let d = path.dirname(r)
+    let e = path.extname(b)
+    let x = require(f)
+    let t = {}
+    let c = {}
+
+    if (x['config']) {
+      if (_.isFunction(x['config'])) {
+        c = x['config'](_.cloneDeep(conf))
+      } else {
+        c = _.merge({}, conf, x['config'])
+      }
+    } else {
+      c = _.merge({}, conf)
+    }
+
+    if (x['name']) {
+      if (_.isFunction(x['name'])) {
+        t['name'] = (function (fn) {
+          let r
+          this.config = c
+          r = fn.call(this)
+          c = this.config
+
+          return r
+        })(x['name'])
+      } else {
+        t['name'] = x['name']
+      }
+    } else {
+      t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e)
+    }
+
+    t = getProperty('dependencies', x, t, c)
+    t = getProperty('help', x, t, c)
+    t = getProperty('aliases', x, t, c)
+    t = getProperty('options', x, t, c)
+
+    if (t['dependencies'] && !_.isArray(t['dependencies'])) {
+      t['dependencies'] = [t['dependencies']]
+    }
+
+    if (_.isFunction(x['task'])) {
+      t['task'] = (function (fn) {
+        let f = function (next) {
+          this.config = c
+          return fn.apply(this, arguments)
+        }
+
+        if (fn.length === 1) {
+          return function (a) {
+            return f.apply(this, arguments)
+          }
+        } else {
+          return function () {
+            return f.apply(this, arguments)
+          }
+        }
+      })(x['task'])
+    } else if (_.isFunction(x)) {
+      t['task'] = (function (fn) {
+        let f = function (next) {
+          this.config = c
+          return fn.apply(this, arguments)
+        }
+
+        if (fn.length === 1) {
+          return function (a) {
+            return f.apply(this, arguments)
+          }
+        } else {
+          return function () {
+            return f.apply(this, arguments)
+          }
+        }
+      })(x)
+    } else {
+      if (t['dependencies']) {
+        let deps = [t['dependencies']]
+
+        t['dependencies'] = []
+        t['task'] = function (next) {
+          runSequence.apply(runSequence, deps.concat(next))
+        }
+      }
+    }
+
+    createTask(t)
+  }
+}
+
+function getProperty (prop, x, t, c) {
+  if (x[prop]) {
+    if (_.isFunction(x[prop])) {
+      t[prop] = x[prop].call({config: c})
+    } else {
+      t[prop] = x[prop]
+    }
   }
 
-  var opts = {};
+  return t
+}
 
-  if (task['aliases']) opts['aliases'] = task['aliases'];
-  if (task['options']) opts['options'] = task['options'];
+function createTask (task) {
+  if (!task['dependencies'] && !task['task']) {
+    if (ignoreEmpty) {
+      return
+    }
 
-  var args = [
+    throw new Error('Tasks must either have dependencies or a task function!')
+  }
+
+  let opts = {}
+
+  if (task['aliases']) opts['aliases'] = task['aliases']
+  if (task['options']) opts['options'] = task['options']
+
+  let args = [
     task['name'],
     task['help'],
     task['dependencies'],
     task['task'],
     opts
-  ];
+  ]
 
-  gulp.task.apply(gulp, args);
+  gulp.task.apply(gulp, args)
 }
