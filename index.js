@@ -124,39 +124,9 @@ function loadTask (base) {
     }
 
     if (_.isFunction(x['task'])) {
-      t['task'] = (function (fn) {
-        let f = function () {
-          this.config = c
-          return fn.apply(this, arguments)
-        }
-
-        if (fn.length === 1) {
-          return function () {
-            return f.apply(this, arguments)
-          }
-        } else {
-          return function () {
-            return f.apply(this, arguments)
-          }
-        }
-      })(x['task'])
+      t['task'] = taskFunc(x['task'], c)
     } else if (_.isFunction(x)) {
-      t['task'] = (function (fn) {
-        let f = function () {
-          this.config = c
-          return fn.apply(this, arguments)
-        }
-
-        if (fn.length === 1) {
-          return function () {
-            return f.apply(this, arguments)
-          }
-        } else {
-          return function () {
-            return f.apply(this, arguments)
-          }
-        }
-      })(x)
+      t['task'] = taskFunc(x, c)
     } else {
       if (t['dependencies']) {
         let deps = t['dependencies']
@@ -169,6 +139,21 @@ function loadTask (base) {
     }
 
     createTask(t)
+  }
+}
+
+function taskFunc (fn, c) {
+  if (fn.length === 1) {
+    return function (next) {
+      fn.config = c
+      fn.call(fn, next)
+    }
+  } else {
+    return function (next) {
+      fn.config = c
+      fn.call(fn)
+      next.call(next)
+    }
   }
 }
 
