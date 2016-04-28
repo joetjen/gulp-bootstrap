@@ -1,70 +1,79 @@
 'use strict'
 
-let prequire = require('parent-require')
-let glob = require('glob-all')
-let path = require('path')
-let _ = require('lodash')
-let gulp = require('gulp-help')(prequire('gulp'), {
+const glob = require('glob-all')
+const path = require('path')
+const _ = require('lodash')
+const gulp = require('gulp-help')(require('gulp'), {
   hideEmpty: true
 })
-let runSequence = require('run-sequence').use(gulp)
+const runSequence = require('run-sequence').use(gulp)
 
-let conf = {}
-let ignoreEmpty = false
+let _conf = {}
+let _ignoreEmpty = false
 
 module.exports = {
-  /**
-   * Set the configuration for tasks.
-   *
-   * @param cfg
-   */
-  config: function (cfg) {
-    config.call(this, cfg)
-
-    return this
-  },
-
-  /**
-   * Allow empty tasks.
-   *
-   * @param ignore
-   */
-  ignoreEmpty: function (ignore) {
-    ignoreEmpty = ignore
-
-    return this
-  },
-
-  /**
-   * Load tasks from paths.
-   *
-   * @param paths
-   */
-  loadTasks: function (paths) {
-    loadTasks.call(this, paths)
-
-    return this
-  }
+  config,
+  ignoreEmpty,
+  loadTasks
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Set the configuration for tasks.
+ *
+ * @param cfg
+ */
 function config (cfg) {
-  conf = _.merge({}, conf, cfg)
+  _config.call(this, cfg)
+
+  return this
 }
 
+/**
+ * Allow empty tasks.
+ *
+ * @param ignore
+ */
+function ignoreEmpty (ignore) {
+  _ignoreEmpty = ignore
+
+  return this
+}
+
+/**
+ * Load tasks from paths.
+ *
+ * @param paths
+ */
 function loadTasks (paths) {
+  _loadTasks.call(this, paths)
+
+  return this
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function _config (cfg) {
+  _conf = _.merge({}, _conf, cfg)
+}
+
+function _loadTasks (paths) {
   if (!_.isArray(paths)) {
     paths = [paths]
   }
 
   let files = glob.sync(paths).sort()
-  let base = _.reduce(files, findBase)
+  let base = _.reduce(files, _findBase)
 
-  if (files.length === 1) base = path.dirname(base)
+  if (files.length === 1) {
+    base = path.dirname(base)
+  }
 
-  files.forEach(loadTask(base))
+  files.forEach(_loadTask(base))
 }
 
-function findBase (a, b) {
+function _findBase (a, b) {
   return (function f (a, b, l) {
     if (a === b) {
       return a
@@ -76,102 +85,119 @@ function findBase (a, b) {
   })(a, b)
 }
 
-function loadTask (base) {
+function _loadTask (base) {
   return function (file) {
-    let r = path.relative(base, file)
-    let f = path.join(process.cwd(), file)
-    let b = path.basename(r)
-    let d = path.dirname(r)
-    let e = path.extname(b)
-    let x = require(f)
-    let t = {}
-    let c = {}
+    let relative = path.relative(base, file)
+    let fullpath = path.join(process.cwd(), file)
+    let basepath = path.basename(relative)
+    let directory = path.dirname(relative)
+    let extension = path.extname(basepath)
+    let taskFile = require(fullpath)
+    let task = {}
+    let config = _.merge({}, _conf)
 
-    if (x['config']) {
-      if (_.isFunction(x['config'])) {
-        c = x['config'](_.cloneDeep(conf))
+    if (taskFile['config']) {
+      if (_.isFunction(taskFile['config'])) {
+        config = _.merge(config, taskFile['config'](_.cloneDeep(_conf)))
       } else {
-        c = _.merge({}, conf, x['config'])
+        config = _.merge(config, taskFile['config'])
       }
-    } else {
-      c = _.merge({}, conf)
     }
 
-    if (x['name']) {
-      if (_.isFunction(x['name'])) {
-        t['name'] = (function (fn) {
+    if (taskFile['name']) {
+      if (_.isFunction(taskFile['name'])) {
+        task['name'] = (function (fn) {
           let r
-          this.config = c
+
+          this.config = config
+
           r = fn.call(this)
-          c = this.config
+
+          config = this.config
 
           return r
-        })(x['name'])
+        })(taskFile['name'])
       } else {
-        t['name'] = x['name']
+        task['name'] = taskFile['name']
       }
     } else {
-      t['name'] = (d === '.' ? '' : d.replace(path.sep, ':') + ':') + path.basename(b, e)
+      task['name'] = (directory === '.'
+          ? ''
+          : directory.replace(path.sep, ':') + ':') + path.basename(basepath, extension)
     }
 
-    t = getProperty('dependencies', x, t, c)
-    t = getProperty('help', x, t, c)
-    t = getProperty('aliases', x, t, c)
-    t = getProperty('options', x, t, c)
+    task = _getProperty('dependencies', taskFile, task, config)
+    task = _getProperty('help', taskFile, task, config)
+    task = _getProperty('aliases', taskFile, task, config)
+    task = _getProperty('options', taskFile, task, config)
 
-    if (t['dependencies'] && !_.isArray(t['dependencies'])) {
-      t['dependencies'] = [t['dependencies']]
+    if (task['dependencies']) {
+      task['dependencies'] = _.flatten([task['dependencies']])
     }
 
-    if (_.isFunction(x['task'])) {
-      t['task'] = taskFunc(x['task'], c)
-    } else if (_.isFunction(x)) {
-      t['task'] = taskFunc(x, c)
-    } else {
-      if (t['dependencies']) {
-        let deps = t['dependencies']
+    if (_.isFunction(taskFile['task'])) {
+      task['task'] = (function (fn) {
+        let f = function (next) {
+          this.config = config
 
-        t['dependencies'] = []
-        t['task'] = function (next) {
-          runSequence.apply(runSequence, deps.concat(next))
+          return fn.apply(this, arguments)
         }
+
+        if (fn.length === 1) {
+          return function (a) {
+            return f.apply(this, arguments)
+          }
+        } else {
+          return function () {
+            return f.apply(this, arguments)
+          }
+        }
+      })(taskFile['task'])
+    } else if (_.isFunction(taskFile)) {
+      task['task'] = (function (fn) {
+        if (fn.length === 1) {
+          return function (next) {
+            this.config = config
+
+            return fn.apply(this, arguments)
+          }
+        } else {
+          return function () {
+            this.config = config
+
+            return fn.apply(this, arguments)
+          }
+        }
+      })(taskFile)
+    } else if (task['dependencies']) {
+      let dependencies = task['dependencies']
+
+      delete task['dependencies']
+
+      task['task'] = function (next) {
+        runSequence.apply(runSequence, dependencies.concat(next))
       }
     }
 
-    createTask(t)
+    _createTask(task)
   }
 }
 
-function taskFunc (fn, c) {
-  if (fn.length === 1) {
-    return function (next) {
-      fn.config = c
-      fn.call(fn, next)
-    }
-  } else {
-    return function (next) {
-      fn.config = c
-      fn.call(fn)
-      next.call(next)
-    }
-  }
-}
-
-function getProperty (prop, x, t, c) {
-  if (x[prop]) {
-    if (_.isFunction(x[prop])) {
-      t[prop] = x[prop].call({config: c})
+function _getProperty (prop, source, task, config) {
+  if (source[prop]) {
+    if (_.isFunction(source[prop])) {
+      task[prop] = source[prop].call({config: config})
     } else {
-      t[prop] = x[prop]
+      task[prop] = source[prop]
     }
   }
 
-  return t
+  return task
 }
 
-function createTask (task) {
+function _createTask (task) {
   if (!task['dependencies'] && !task['task']) {
-    if (ignoreEmpty) {
+    if (_ignoreEmpty) {
       return
     }
 
